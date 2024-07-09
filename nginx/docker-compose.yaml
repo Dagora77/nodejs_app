@@ -1,0 +1,22 @@
+version: '3.7'
+
+services:
+  nginx:
+    image: nginx:alpine
+    container_name: nginx-container
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./nginx/conf.d:/etc/nginx/conf.d
+      - ./nginx/certs:/etc/nginx/certs
+      - ./nginx/log:/var/log/nginx
+      - ./nginx/html:/usr/share/nginx/html
+
+  certbot:
+    image: certbot/certbot
+    container_name: certbot-container
+    volumes:
+      - ./nginx/certs:/etc/letsencrypt
+      - ./nginx/certs-data:/data/letsencrypt
+    entrypoint: "/bin/sh -c 'trap exit TERM; while :; do certbot renew; sleep 12h & wait $${!}; done;'"
